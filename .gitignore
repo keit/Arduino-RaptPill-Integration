@@ -4,6 +4,7 @@
 
 ### Arduino ###
 arduino_secrets.my
+arduino_secrets.h
 
 ### macOS ###
 # General

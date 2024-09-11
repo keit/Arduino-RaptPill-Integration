@@ -23,19 +23,12 @@ const char* api_url = "https://api.rapt.io/api/Hydrometers/GetHydrometers";
 String bearerToken = "";
 
 // WiFi client for HTTPS
-WiFiSSLClient client;
+WiFiSSLClient id_client;
+WiFiSSLClient api_client;
 
 void setup() {
   Serial.begin(115200);
   connectToWiFi();
-
-  // Step 1: Obtain bearer token
-  obtainBearerToken();
-
-  // Step 2: Make API request using the token
-  if (bearerToken != "") {
-    apiRequest();
-  }
 }
 
 void connectToWiFi() {
@@ -49,7 +42,7 @@ void connectToWiFi() {
 }
 
 void obtainBearerToken() {
-  if (!client.connect("id.rapt.io", 443)) {
+  if (!id_client.connect("id.rapt.io", 443)) {
     Serial.println("Connection to token server failed!");
     return;
   }
@@ -61,58 +54,87 @@ void obtainBearerToken() {
                        "&password=" + String(api_password);
 
   // Send the POST request
-  client.println("POST /connect/token HTTP/1.1");
-  client.println("Host: id.rapt.io");
-  client.println("Content-Type: application/x-www-form-urlencoded");
-  client.println("Content-Length: " + String(requestBody.length()));
-  client.println();
-  client.println(requestBody);
+  id_client.println("POST /connect/token HTTP/1.1");
+  id_client.println("Host: id.rapt.io");
+  id_client.println("Content-Type: application/x-www-form-urlencoded");
+  id_client.println("Content-Length: " + String(requestBody.length()));
+  id_client.println();
+  id_client.println(requestBody);
 
   // Wait for the response
-  while (client.connected()) {
-    String line = client.readStringUntil('\n');
+  while (id_client.connected()) {
+    String line = id_client.readStringUntil('\n');
     if (line == "\r") {
       break;
     }
   }
 
-  // Get the response body
-  String response = client.readString();
-  Serial.println("Token Response: " + response);
+  String jsonBegin = id_client.readStringUntil('{');
+  String jsonBody = id_client.readStringUntil('}');
+
+  String tokenJSON = "{" + jsonBody + "}";
+
+  Serial.println("Token Response: " + tokenJSON);
 
   // Parse the JSON response
-  DynamicJsonDocument doc(1024);
-  deserializeJson(doc, response);
-  bearerToken = doc["access_token"].as<String>();
-  Serial.println("Bearer Token: " + bearerToken);
+   DynamicJsonDocument doc(1024);
+   deserializeJson(doc, tokenJSON);
+   bearerToken = doc["access_token"].as<String>();
+   Serial.println("Bearer Token: " + bearerToken);
+
+   id_client.stop();
 }
 
 void apiRequest() {
-  if (!client.connect("api.rapt.io", 443)) {
+  Serial.println("Connection to API server");
+
+  if (!api_client.connect("api.rapt.io", 443)) {
     Serial.println("Connection to API server failed!");
     return;
   }
 
   // Send the GET request with bearer token
-  client.println("GET /api/Hydrometers/GetHydrometers HTTP/1.1");
-  client.println("Host: api.rapt.io");
-  client.println("Accept: application/json");
-  client.println("Authorization: Bearer " + bearerToken);
-  client.println();
+  api_client.println("GET /api/Hydrometers/GetHydrometers HTTP/1.1");
+  api_client.println("Host: api.rapt.io");
+  api_client.println("Accept: application/json");
+  api_client.println("Authorization: Bearer " + bearerToken);
+  api_client.println();
 
   // Wait for the response
-  while (client.connected()) {
-    String line = client.readStringUntil('\n');
+  while (api_client.connected()) {
+    String line = api_client.readStringUntil('\n');
     if (line == "\r") {
       break;
     }
   }
 
-  // Get the response body
-  String response = client.readString();
-  Serial.println("API Response: " + response);
+  String jsonBegin = api_client.readStringUntil('[');
+  String jsonBody = api_client.readStringUntil(']');
+
+  String apiJSON = "[" + jsonBody + "]";
+
+  Serial.println("API Response: " + apiJSON);
+
+  // Parse the JSON response
+   DynamicJsonDocument doc(1024);
+   deserializeJson(doc, apiJSON);
+   Serial.println("temperature: " + doc[0]["temperature"].as<String>());
+   Serial.println("gravity: " + doc[0]["gravity"].as<String>());
+
+   id_client.stop();
+
 }
 
 void loop() {
+  // Step 1: Obtain bearer token
+  obtainBearerToken();
+
+
+  // Step 2: Make API request using the token
+  if (bearerToken != "") {
+    apiRequest();
+  }
+
+  delay(120000);
   // No need for loop in this case
 }
