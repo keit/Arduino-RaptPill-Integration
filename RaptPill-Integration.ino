@@ -19,6 +19,9 @@ const char* api_password = API_SECRET; // replace with actual password
 const char* token_url = "https://id.rapt.io/connect/token";
 const char* api_url = "https://api.rapt.io/api/Hydrometers/GetHydrometers";
 
+// polling interval
+const int polling_interval = 30 * 60 * 1000;
+
 // Global variable to store the bearer token
 String bearerToken = "";
 
@@ -121,7 +124,7 @@ void apiRequest() {
    Serial.println("temperature: " + doc[0]["temperature"].as<String>());
    Serial.println("gravity: " + doc[0]["gravity"].as<String>());
 
-   id_client.stop();
+   api_client.stop();
 
 }
 
@@ -135,6 +138,7 @@ void loop() {
     apiRequest();
   }
 
-  delay(120000);
+
+  delay(polling_interval);
   // No need for loop in this case
 }
