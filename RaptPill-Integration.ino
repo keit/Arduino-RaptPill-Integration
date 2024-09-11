@@ -5,6 +5,11 @@
 
 #include "arduino_secrets.h"
 
+#define TEMP_THRESHOLD 18.0
+#define POWER 7
+#define HEATER_ON_LED 0
+#define HEATER_OFF_LED 3
+
 // WiFi credentials
 const char* ssid = SECRET_SSID;
 const char* password = SECRET_PASS;
@@ -31,6 +36,10 @@ WiFiSSLClient api_client;
 
 void setup() {
   Serial.begin(115200);
+  pinMode(HEATER_ON_LED, OUTPUT);
+  pinMode(HEATER_OFF_LED, OUTPUT);
+  pinMode(POWER, OUTPUT);
+
   connectToWiFi();
 }
 
@@ -88,12 +97,12 @@ void obtainBearerToken() {
    id_client.stop();
 }
 
-void apiRequest() {
+float getTempAPI() {
   Serial.println("Connection to API server");
 
   if (!api_client.connect("api.rapt.io", 443)) {
     Serial.println("Connection to API server failed!");
-    return;
+    return 0.0;
   }
 
   // Send the GET request with bearer token
@@ -119,13 +128,33 @@ void apiRequest() {
   Serial.println("API Response: " + apiJSON);
 
   // Parse the JSON response
-   DynamicJsonDocument doc(1024);
-   deserializeJson(doc, apiJSON);
-   Serial.println("temperature: " + doc[0]["temperature"].as<String>());
-   Serial.println("gravity: " + doc[0]["gravity"].as<String>());
+  DynamicJsonDocument doc(1024);
+  deserializeJson(doc, apiJSON);
 
-   api_client.stop();
+  String temp = doc[0]["temperature"].as<String>();
+  String gravity = doc[0]["gravity"].as<String>();
+  Serial.println("temperature: " + temp);
+  Serial.println("gravity: " + gravity);
 
+  api_client.stop();
+
+  return temp.toFloat();
+}
+
+void switchPower(float temp) {
+  Serial.println("Current temp: " + String(temp, 2) + " Threshold: " + TEMP_THRESHOLD);
+  if (temp < TEMP_THRESHOLD) {
+    Serial.println("tuon ON heater");
+    digitalWrite(POWER, HIGH);
+    digitalWrite(HEATER_ON_LED, HIGH);
+    digitalWrite(HEATER_OFF_LED, LOW);
+  }
+  else {
+    Serial.println("tuon OFF heater");
+    digitalWrite(POWER, LOW);
+    digitalWrite(HEATER_ON_LED, LOW);
+    digitalWrite(HEATER_OFF_LED, HIGH);
+  }
 }
 
 void loop() {
@@ -135,7 +164,8 @@ void loop() {
 
   // Step 2: Make API request using the token
   if (bearerToken != "") {
-    apiRequest();
+    float temp = getTempAPI();
+    switchPower(temp);
   }
 
 
