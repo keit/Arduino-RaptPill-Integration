@@ -40,6 +40,7 @@ void setup() {
   pinMode(HEATER_OFF_LED, OUTPUT);
   pinMode(POWER, OUTPUT);
 
+  Serial.println("Polling interval: " + String(polling_interval) + "ms. Heater threshold temp: " + String(TEMP_THRESHOLD));
   connectToWiFi();
 }
 
@@ -50,7 +51,8 @@ void connectToWiFi() {
     delay(1000);
     Serial.println("Connecting...");
   }
-  Serial.println("Connected to WiFi!");
+  Serial.print("Connected to WiFi! ");
+  Serial.println(WiFi.localIP());
 }
 
 void obtainBearerToken() {
@@ -86,13 +88,10 @@ void obtainBearerToken() {
 
   String tokenJSON = "{" + jsonBody + "}";
 
-  Serial.println("Token Response: " + tokenJSON);
-
   // Parse the JSON response
    DynamicJsonDocument doc(1024);
    deserializeJson(doc, tokenJSON);
    bearerToken = doc["access_token"].as<String>();
-   Serial.println("Bearer Token: " + bearerToken);
 
    id_client.stop();
 }
@@ -125,8 +124,6 @@ float getTempAPI() {
 
   String apiJSON = "[" + jsonBody + "]";
 
-  Serial.println("API Response: " + apiJSON);
-
   // Parse the JSON response
   DynamicJsonDocument doc(1024);
   deserializeJson(doc, apiJSON);
@@ -142,7 +139,6 @@ float getTempAPI() {
 }
 
 void switchPower(float temp) {
-  Serial.println("Current temp: " + String(temp, 2) + " Threshold: " + TEMP_THRESHOLD);
   if (temp < TEMP_THRESHOLD) {
     Serial.println("tuon ON heater");
     digitalWrite(POWER, HIGH);
