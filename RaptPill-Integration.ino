@@ -14,6 +14,9 @@
 const char* ssid = SECRET_SSID;
 const char* password = SECRET_PASS;
 
+// Server settings
+WiFiServer server(80);  // HTTP server on port 80
+
 // API credentials
 const char* client_id = "rapt-user";
 const char* grant_type = "password";
@@ -26,6 +29,7 @@ const char* api_url = "https://api.rapt.io/api/Hydrometers/GetHydrometers";
 
 // polling interval
 const int polling_interval = 30 * 60 * 1000;
+unsigned long previousMillis = 0;   // Stores the last time SSL request was made
 
 // Global variable to store the bearer token
 String bearerToken = "";
@@ -42,6 +46,9 @@ void setup() {
 
   Serial.println("Polling interval: " + String(polling_interval) + "ms. Heater threshold temp: " + String(TEMP_THRESHOLD));
   connectToWiFi();
+
+  // Start the HTTP server
+  server.begin();
 }
 
 void connectToWiFi() {
@@ -140,31 +147,68 @@ float getTempAPI() {
 
 void switchPower(float temp) {
   if (temp < TEMP_THRESHOLD) {
-    Serial.println("tuon ON heater");
-    digitalWrite(POWER, HIGH);
-    digitalWrite(HEATER_ON_LED, HIGH);
-    digitalWrite(HEATER_OFF_LED, LOW);
+    heaterOn();
   }
   else {
-    Serial.println("tuon OFF heater");
-    digitalWrite(POWER, LOW);
-    digitalWrite(HEATER_ON_LED, LOW);
-    digitalWrite(HEATER_OFF_LED, HIGH);
+    heaterOff();
   }
 }
 
-void loop() {
-  // Step 1: Obtain bearer token
-  obtainBearerToken();
+void heaterOn() {
+  Serial.println("tuon ON heater");
+  digitalWrite(POWER, HIGH);
+  digitalWrite(HEATER_ON_LED, HIGH);
+  digitalWrite(HEATER_OFF_LED, LOW);
+}
 
+void heaterOff() {
+  Serial.println("tuon OFF heater");
+  digitalWrite(POWER, LOW);
+  digitalWrite(HEATER_ON_LED, LOW);
+  digitalWrite(HEATER_OFF_LED, HIGH);
+}
 
-  // Step 2: Make API request using the token
-  if (bearerToken != "") {
-    float temp = getTempAPI();
-    switchPower(temp);
+// Function to handle incoming HTTP requests
+void handleClient(WiFiClient client) {
+  Serial.println("New client connected");
+
+  // Wait until the client sends some data
+  while (client.available()) {
+    String request = client.readStringUntil('\r');
+    Serial.println(request);
+    client.flush();
+    
+    // Respond to the client (basic HTML response)
+    client.println("HTTP/1.1 200 OK");
+    client.println("Content-type:text/html");
+    client.println();
+    client.println("<html><body><h1>Settings page</h1></body></html>");
+    client.println();
+    break;
   }
 
+  // Close the connection
+  client.stop();
+  Serial.println("Client disconnected");
+}
 
-  delay(polling_interval);
-  // No need for loop in this case
+void loop() {
+    // Check for incoming HTTP clients
+  WiFiClient client = server.available();
+  if (client) {
+    handleClient(client);
+  }
+
+  unsigned long currentMillis = millis();
+  if (currentMillis - previousMillis >= polling_interval) {
+    previousMillis = currentMillis;
+    // Step 1: Obtain bearer token
+    obtainBearerToken();
+
+    // Step 2: Make API request using the token
+    if (bearerToken != "") {
+      float temp = getTempAPI();
+      switchPower(temp);
+    }
+  }
 }
