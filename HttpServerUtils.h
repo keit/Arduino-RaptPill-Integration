@@ -1,7 +1,12 @@
 #ifndef HTTPSERVERUTILS_H
 #define HTTPSERVERUTILS_H
 
+#include "ControllerData.h"
+
 const char* getHttpRespHeader();
-const char* getHTMLPage();
+const char* getHTMLPage(String ipAddress);
+
+void sendJSONData(WiFiClient& client, ControllerData& ctrlData);
+void updateThreshold(WiFiClient& client, String request, ControllerData& ctrlData);
 
 #endif

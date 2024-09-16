@@ -69,6 +69,20 @@ void connectToWiFi() {
   Serial.println(WiFi.localIP());
 }
 
+void checkWiFi() {
+    if (WiFi.status() != WL_CONNECTED) {
+        Serial.println("Reconnecting to WiFi...");
+        WiFi.disconnect();
+        WiFi.begin(ssid, password);
+        while (WiFi.status() != WL_CONNECTED) {
+            delay(1000);
+            Serial.print(".");
+        }
+        Serial.println("Reconnected to WiFi.");
+    }
+}
+
+
 void obtainBearerToken() {
   if (!id_client.connect("id.rapt.io", 443)) {
     Serial.println("Connection to token server failed!");
@@ -172,16 +186,28 @@ void heaterOff() {
 // Function to handle incoming HTTP requests
 void handleClient(WiFiClient client) {
   Serial.println("New client connected");
-
   // Wait until the client sends some data
-  while (client.available()) {
-    String request = client.readStringUntil('\r');
-    Serial.println(request);
+  while(client.available()) {
+    // Serial.println("Request all: " + client.readString());
+    String requestHeader = client.readStringUntil('\r');
+    String requestBody = client.readString();
+    Serial.println("Request: " + requestHeader);
+    Serial.println("request body: " + requestBody);
     client.flush();
     
-    // Respond to the client (basic HTML response)
-    client.print(getHttpRespHeader());
-    client.print(getHTMLPage());
+    if (requestHeader.indexOf("GET /index") != -1) {
+      Serial.println("/index");
+      client.print(getHttpRespHeader());
+      client.print(getHTMLPage(WiFi.localIP().toString()));
+    } else if (requestHeader.indexOf("GET /data") != -1) {
+      Serial.println("/data");
+      // Serve the JSON data
+      sendJSONData(client, ctrlData);
+    } else if (requestHeader.indexOf("POST /updateThreshold") != -1) {
+      Serial.println("/updateThreshold");
+      // Receive and update the heaterThreshold
+      updateThreshold(client, requestBody, ctrlData);
+    }
     break;
   }
 
@@ -191,11 +217,13 @@ void handleClient(WiFiClient client) {
 }
 
 void loop() {
+  checkWiFi();
+  
   // Check for incoming HTTP clients
   WiFiClient client = server.available();
   if (client) {
     handleClient(client);
-  }
+  } 
 
   unsigned long currentMillis = millis();
   if (currentMillis - previousMillis >= polling_interval || previousMillis == 0) {

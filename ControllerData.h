@@ -14,4 +14,5 @@ struct ControllerData {
 
 void initCtrlData(ControllerData &ctrlData);
 void updateFromAPI(ControllerData &ctrlData, float temp, float gravity);
+void updateHeaterThreshold(ControllerData &ctrlData, float heaterThreashold);
 #endif

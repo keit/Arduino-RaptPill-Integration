@@ -17,9 +17,17 @@ void updateFromAPI(ControllerData &ctrlData, float temp, float gravity) {
   print(ctrlData);
 
   ctrlData.currentTemp = temp;
-  ctrlData.currentGravity = gravity;
+  ctrlData.currentGravity = gravity/1000;
   ctrlData.heaterStatus = temp < TEMP_THRESHOLD_DEFAULT;
 
   Serial.println("After updateFromAPI");
+  print(ctrlData);
+}
+
+void updateHeaterThreshold(ControllerData &ctrlData, float heaterThreashold) {
+  Serial.println("Before updateHeaterThreshold");
+  print(ctrlData);
+  ctrlData.heaterThreshold = heaterThreashold;
+  Serial.println("After updateHeaterThreshold");
   print(ctrlData);
 }
