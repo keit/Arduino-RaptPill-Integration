@@ -4,8 +4,9 @@
 #include <ArduinoJson.h>
 
 #include "arduino_secrets.h"
+#include "HttpServerUtils.h"
+#include "ControllerData.h"
 
-#define TEMP_THRESHOLD 18.0
 #define POWER 7
 #define HEATER_ON_LED 0
 #define HEATER_OFF_LED 3
@@ -38,13 +39,19 @@ String bearerToken = "";
 WiFiSSLClient id_client;
 WiFiSSLClient api_client;
 
+ControllerData ctrlData;
+
 void setup() {
-  Serial.begin(115200);
+  delay(1000); // 1 second delay to give time initialization after upload.
+  Serial.begin(9600);
+
   pinMode(HEATER_ON_LED, OUTPUT);
   pinMode(HEATER_OFF_LED, OUTPUT);
   pinMode(POWER, OUTPUT);
 
-  Serial.println("Polling interval: " + String(polling_interval) + "ms. Heater threshold temp: " + String(TEMP_THRESHOLD));
+  initCtrlData(ctrlData);
+  Serial.println("Polling interval: " + String(polling_interval) + "ms. Heater threshold temp: " + String(ctrlData.heaterThreshold));
+
   connectToWiFi();
 
   // Start the HTTP server
@@ -103,12 +110,11 @@ void obtainBearerToken() {
    id_client.stop();
 }
 
-float getTempAPI() {
+void refreshDataFromAPI() {
   Serial.println("Connection to API server");
 
   if (!api_client.connect("api.rapt.io", 443)) {
     Serial.println("Connection to API server failed!");
-    return 0.0;
   }
 
   // Send the GET request with bearer token
@@ -135,18 +141,13 @@ float getTempAPI() {
   DynamicJsonDocument doc(1024);
   deserializeJson(doc, apiJSON);
 
-  String temp = doc[0]["temperature"].as<String>();
-  String gravity = doc[0]["gravity"].as<String>();
-  Serial.println("temperature: " + temp);
-  Serial.println("gravity: " + gravity);
+  updateFromAPI(ctrlData, doc[0]["temperature"].as<float>(), doc[0]["gravity"].as<float>());
 
   api_client.stop();
-
-  return temp.toFloat();
 }
 
-void switchPower(float temp) {
-  if (temp < TEMP_THRESHOLD) {
+void switchPower(bool heaterStatus) {
+  if (heaterStatus) {
     heaterOn();
   }
   else {
@@ -179,11 +180,8 @@ void handleClient(WiFiClient client) {
     client.flush();
     
     // Respond to the client (basic HTML response)
-    client.println("HTTP/1.1 200 OK");
-    client.println("Content-type:text/html");
-    client.println();
-    client.println("<html><body><h1>Settings page</h1></body></html>");
-    client.println();
+    client.print(getHttpRespHeader());
+    client.print(getHTMLPage());
     break;
   }
 
@@ -193,22 +191,22 @@ void handleClient(WiFiClient client) {
 }
 
 void loop() {
-    // Check for incoming HTTP clients
+  // Check for incoming HTTP clients
   WiFiClient client = server.available();
   if (client) {
     handleClient(client);
   }
 
   unsigned long currentMillis = millis();
-  if (currentMillis - previousMillis >= polling_interval) {
+  if (currentMillis - previousMillis >= polling_interval || previousMillis == 0) {
     previousMillis = currentMillis;
     // Step 1: Obtain bearer token
     obtainBearerToken();
 
     // Step 2: Make API request using the token
     if (bearerToken != "") {
-      float temp = getTempAPI();
-      switchPower(temp);
+      refreshDataFromAPI();
+      switchPower(ctrlData.heaterStatus);
     }
   }
 }
