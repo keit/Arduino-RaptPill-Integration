@@ -2,7 +2,12 @@
 #include "ControllerData.h"
 
 void print(ControllerData &ctrlData) {
-  Serial.println("CurrentTemp: " + String(ctrlData.currentTemp) + " Heater Threshold: " + String(ctrlData.heaterThreshold) + " Current Gravity: " + String(ctrlData.currentGravity) + " Heater Status: " + String(ctrlData.heaterStatus));
+  Serial.println("CurrentTemp: " + String(ctrlData.currentTemp) + 
+  " Heater Threshold: " + String(ctrlData.heaterThreshold) + 
+  " Current Gravity: " + String(ctrlData.currentGravity) + 
+  " Heater Status: " + String(ctrlData.heaterStatus) +
+  " Battery: " + String(ctrlData.battery)
+  );
 }
 
 void initCtrlData(ControllerData &ctrlData) {
@@ -10,15 +15,17 @@ void initCtrlData(ControllerData &ctrlData) {
   ctrlData.currentTemp = -1;
   ctrlData.heaterStatus = HEATER_OFF;
   ctrlData.heaterThreshold = TEMP_THRESHOLD_DEFAULT;
+  ctrlData.battery = -1;
 }
 
-void updateFromAPI(ControllerData &ctrlData, float temp, float gravity) {
+void updateFromAPI(ControllerData &ctrlData, float temp, float gravity, float battery) {
   Serial.println("Before updateFromAPI");
   print(ctrlData);
 
   ctrlData.currentTemp = temp;
   ctrlData.currentGravity = gravity/1000;
   ctrlData.heaterStatus = temp < ctrlData.heaterThreshold;
+  ctrlData.battery = battery;
 
   Serial.println("After updateFromAPI");
   print(ctrlData);

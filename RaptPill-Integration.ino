@@ -150,12 +150,10 @@ void refreshDataFromAPI() {
   String jsonBody = api_client.readStringUntil(']');
 
   String apiJSON = "[" + jsonBody + "]";
-
   // Parse the JSON response
   DynamicJsonDocument doc(1024);
   deserializeJson(doc, apiJSON);
-
-  updateFromAPI(ctrlData, doc[0]["temperature"].as<float>(), doc[0]["gravity"].as<float>());
+  updateFromAPI(ctrlData, doc[0]["temperature"].as<float>(), doc[0]["gravity"].as<float>(), doc[0]["battery"].as<float>());
 
   api_client.stop();
 }

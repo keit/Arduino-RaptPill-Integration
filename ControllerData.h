@@ -10,9 +10,10 @@ struct ControllerData {
   float currentGravity;
   bool heaterStatus;
   float heaterThreshold;
+  float battery;
 };
 
 void initCtrlData(ControllerData &ctrlData);
-void updateFromAPI(ControllerData &ctrlData, float temp, float gravity);
+void updateFromAPI(ControllerData &ctrlData, float temp, float gravity, float battery);
 void updateHeaterThreshold(ControllerData &ctrlData, float heaterThreashold);
 #endif
