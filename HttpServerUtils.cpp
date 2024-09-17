@@ -106,7 +106,7 @@ const char* getHTMLPage(String ipAddress) {
                 .then(data => {
                     document.getElementById('currentTemp').textContent = data.currentTemp.toFixed(2) + '°C';
                     document.getElementById('currentGravity').textContent = data.currentGravity.toFixed(3);
-                    document.getElementById('heaterStatus').textContent = data.heaterStatus;
+                    document.getElementById('heaterStatus').textContent = data.heaterStatus ? '☀️ On' : '❄️ Off';
                     document.getElementById('heaterThreshold').textContent = data.heaterThreshold.toFixed(2) + '°C';
                     document.getElementById('battery').textContent = data.battery.toFixed(0) + '%';
                 })
