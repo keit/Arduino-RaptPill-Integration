@@ -28,74 +28,74 @@ const char* getHTMLPage(String ipAddress) {
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="">
-    <div class="px-32">
-        <h2 style="text-align:center;">Heater Control System</h2>
+    <div class="px-4 sm:px-6 md:px-10 lg:px-32">
+        <h2 class="text-center">Heater Control System</h2>
 
         <div class="relative overflow-x-auto">
-            <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+            <table class="min-w-full text-sm text-left text-gray-500 dark:text-gray-400">
                 <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                     <tr>
-                        <th scope="col" class="px-6 py-3 w-1/2">
+                        <th scope="col" class="px-2 py-3 w-1/2">
                             Data
                         </th>
-                        <th scope="col" class="px-6 py-3">
+                        <th scope="col" class="px-2 py-3">
                             Value
                         </th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
-                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                        <th scope="row" class="px-2 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                             Temperature
                         </th>
-                        <td id="currentTemp" class="px-6 py-4">Loading...</td>
+                        <td id="currentTemp" class="px-2 py-4">Loading...</td>
                     </tr>
                     <tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
-                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                        <th scope="row" class="px-2 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                             Gravity
                         </th>
-                        <td id="currentGravity" class="px-6 py-4">
+                        <td id="currentGravity" class="px-2 py-4">
                             Loading...
                         </td>
                     </tr>
                     <tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
-                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                        <th scope="row" class="px-2 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                             Heater Status
                         </th>
-                        <td id="heaterStatus" class="px-6 py-4">
+                        <td id="heaterStatus" class="px-2 py-4">
                             Loading...
                         </td>
                     </tr>
                     <tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
-                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                        <th scope="row" class="px-2 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                             Heater Threshold
                         </th>
-                        <td id="heaterThreshold" class="px-6 py-4">
+                        <td id="heaterThreshold" class="px-2 py-4">
                             Loading...
                         </td>
                     </tr>
                     <tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
-                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                        <th scope="row" class="px-2 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                             Battery
                         </th>
-                        <td id="battery" class="px-6 py-4">
+                        <td id="battery" class="px-2 py-4">
                             Loading...
                         </td>
                     </tr>
                 </tbody>
             </table>
+
+            <!-- Form -->
+            <form id="updateForm" class="p">
+                <div class="flex flex-col items-center mt-2 space-y-2 sm:flex-row sm:space-y-0 sm:space-x-4">
+                    <label for="newThreshold" class="sm:mr-4">Update Heater Threshold</label>
+                    <input type="number" id="newThreshold" name="newThreshold" class="text-blue-500 placeholder-gray-400 p-2 border border-gray-300 rounded" min="0" step="0.1" required>
+                    <span>°C</span>
+                    <button type="submit" class="mt-2 sm:mt-0 focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Update</button>
+                </div>
+            </form>
+            <p id="message" class="text-center text-green-500 mt-4"></p>
         </div>
-
-        <form id="updateForm" class="p">
-            <div class="flex justify-center items-center mt-2">
-                <label for="newThreshold" class="mr-4">Update Heater Threshold</label>
-                <input type="number" id="newThreshold" name="newThreshold" class="mr-2 text-blue-500 placeholder-gray-400 p-2 border border-gray-300 rounded" min="0" step="0.1" required><span>°C</span>
-                <button type="submit" class="ml-4 mt-2 focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Update</button>
-            </div>
-        </form>
-
-        <p id="message" style="text-align:center; color:green;"></p>
-
     </div>
 
     <script>
@@ -149,6 +149,7 @@ const char* getHTMLPage(String ipAddress) {
 </body>
 </html>
 )";
+
   String pageString = String(page);
   pageString.replace(String("<arduino_ip>"), ipAddress);
   return pageString.c_str();
