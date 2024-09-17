@@ -234,8 +234,8 @@ void loop() {
 
     // Step 2: Make API request using the token
     if (bearerToken != "") {
-      // refreshDataFromAPI();
-      // switchPower(ctrlData.heaterStatus);
+      refreshDataFromAPI();
+      switchPower(ctrlData.heaterStatus);
     }
   }
 }

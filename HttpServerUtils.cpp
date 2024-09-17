@@ -25,59 +25,70 @@ const char* getHTMLPage(String ipAddress) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="data:," />
     <title>Heater Threshold Control</title>
-    <style>
-        table {
-            width: 50%;
-            margin: 20px auto;
-            border-collapse: collapse;
-        }
-        table, th, td {
-            border: 1px solid black;
-        }
-        th, td {
-            padding: 10px;
-            text-align: center;
-        }
-        form {
-            text-align: center;
-            margin-top: 20px;
-        }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="">
+    <div class="px-32">
+        <h2 style="text-align:center;">Heater Control System</h2>
 
-    <h2 style="text-align:center;">Heater Control System</h2>
+        <div class="relative overflow-x-auto">
+            <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 w-1/2">
+                            Data
+                        </th>
+                        <th scope="col" class="px-6 py-3">
+                            Value
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
+                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                            Temperature
+                        </th>
+                        <td id="currentTemp" class="px-6 py-4">Loading...</td>
+                    </tr>
+                    <tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
+                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                            Gravity
+                        </th>
+                        <td id="currentGravity" class="px-6 py-4">
+                            Loading...
+                        </td>
+                    </tr>
+                    <tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
+                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                            Heater Status
+                        </th>
+                        <td id="heaterStatus" class="px-6 py-4">
+                            Loading...
+                        </td>
+                    </tr>
+                    <tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
+                        <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                            Heater Threshold
+                        </th>
+                        <td id="heaterThreshold" class="px-6 py-4">
+                            Loading...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
-    <table>
-        <tr>
-            <th>Data</th>
-            <th>Value</th>
-        </tr>
-        <tr>
-            <td>Temperature</td>
-            <td id="currentTemp">Loading...</td>
-        </tr>
-        <tr>
-            <td>Gravity</td>
-            <td id="currentGravity">Loading...</td>
-        </tr>
-        <tr>
-            <td>Heater Status</td>
-            <td id="heaterStatus">Loading...</td>
-        </tr>
-        <tr>
-            <td>Heater Threshold</td>
-            <td id="heaterThreshold">Loading...</td>
-        </tr>
-    </table>
+        <form id="updateForm" class="p">
+            <div class="flex justify-center items-center mt-2">
+                <label for="newThreshold" class="mr-4">Update Heater Threshold</label>
+                <input type="number" id="newThreshold" name="newThreshold" class="mr-2 text-blue-500 placeholder-gray-400 p-2 border border-gray-300 rounded" min="0" step="0.1" required><span>°C</span>
+                <button type="submit" class="ml-4 mt-2 focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Update</button>
+            </div>
+        </form>
 
-    <form id="updateForm">
-        <label for="newThreshold">Update Heater Threshold: </label>
-        <input type="number" id="newThreshold" name="newThreshold" min="0" step="0.1" required> °C
-        <button type="submit">Update</button>
-    </form>
+        <p id="message" style="text-align:center; color:green;"></p>
 
-    <p id="message" style="text-align:center; color:green;"></p>
+    </div>
 
     <script>
         // Fetch data from the Arduino server
@@ -165,7 +176,7 @@ void updateThreshold(WiFiClient& client, String request, ControllerData& ctrlDat
         client.println("Connection: close");
         client.println();
         client.println("Threshold updated to: " + String(ctrlData.heaterThreshold));
-    } 
+    }
 }
 
 void parseHTTPHeaders(WiFiClient& client) {
