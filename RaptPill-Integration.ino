@@ -185,40 +185,41 @@ void heaterOff() {
 
 // Function to handle incoming HTTP requests
 void handleClient(WiFiClient client) {
-  Serial.println("New client connected");
+  clearHeaders();
+
+  String requestLine = client.readStringUntil('\r');
+  Serial.println("Request Line: " + requestLine);
+  client.readStringUntil('\n');  // Skip remaining part of the request line
+
   // Wait until the client sends some data
   while(client.available()) {
-    // Serial.println("Request all: " + client.readString());
-    String requestHeader = client.readStringUntil('\r');
+    parseHTTPHeaders(client);
+    String hostName = getHeaderValue("Host");
+
     String requestBody = client.readString();
-    Serial.println("Request: " + requestHeader);
-    Serial.println("request body: " + requestBody);
+    Serial.println("Request Body: " + requestBody);
     client.flush();
     
-    if (requestHeader.indexOf("GET /index") != -1) {
-      Serial.println("/index");
-      client.print(getHttpRespHeader());
-      client.print(getHTMLPage(WiFi.localIP().toString()));
-    } else if (requestHeader.indexOf("GET /data") != -1) {
-      Serial.println("/data");
+    if (requestLine.indexOf("GET /data") != -1) {
       // Serve the JSON data
       sendJSONData(client, ctrlData);
-    } else if (requestHeader.indexOf("POST /updateThreshold") != -1) {
-      Serial.println("/updateThreshold");
+    } else if (requestLine.indexOf("POST /updateThreshold") != -1) {
       // Receive and update the heaterThreshold
       updateThreshold(client, requestBody, ctrlData);
+    } else {
+      client.print(getHttpRespHeader());
+      client.print(getHTMLPage(hostName));
     }
     break;
   }
 
   // Close the connection
   client.stop();
-  Serial.println("Client disconnected");
 }
 
 void loop() {
   checkWiFi();
-  
+
   // Check for incoming HTTP clients
   WiFiClient client = server.available();
   if (client) {
@@ -233,8 +234,8 @@ void loop() {
 
     // Step 2: Make API request using the token
     if (bearerToken != "") {
-      refreshDataFromAPI();
-      switchPower(ctrlData.heaterStatus);
+      // refreshDataFromAPI();
+      // switchPower(ctrlData.heaterStatus);
     }
   }
 }

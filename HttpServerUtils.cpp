@@ -3,6 +3,12 @@
 #include <ArduinoJson.h>
 #include "HttpServerUtils.h"
 
+
+const int MAX_HEADERS = 10;  // Maximum number of headers to store
+String headerKeys[MAX_HEADERS];  // Array for header keys
+String headerValues[MAX_HEADERS];  // Array for header values
+int headerCount = 0;  // Keep track of the number of headers
+
 const char* getHttpRespHeader() {
   // Add "\r\n\r\n" to ensure proper header-body separation
   return "HTTP/1.1 200 OK\r\n"
@@ -162,3 +168,50 @@ void updateThreshold(WiFiClient& client, String request, ControllerData& ctrlDat
     } 
 }
 
+void parseHTTPHeaders(WiFiClient& client) {
+  while (client.available()) {
+    String headerLine = client.readStringUntil('\r');
+    headerLine.trim();  // Trim newline characters
+    if (headerLine.length() == 0) {
+        return;  // Blank line indicates the end of headers
+    }
+
+    // Parse the header line into key and value
+    int separatorIndex = headerLine.indexOf(':');
+    if (separatorIndex > 0 && headerCount < MAX_HEADERS) {
+        String key = headerLine.substring(0, separatorIndex);
+        String value = headerLine.substring(separatorIndex + 2);  // Skip ": " part
+        addHeader(key, value);  // Store the header key-value pair
+    }
+  }
+}
+
+// Function to store header key-value pair in the arrays
+void addHeader(String key, String value) {
+    if (headerCount < MAX_HEADERS) {
+        headerKeys[headerCount] = key;
+        headerValues[headerCount] = value;
+        headerCount++;
+    } else {
+        Serial.println("Header storage limit reached.");
+    }
+}
+
+// Function to clear stored headers
+void clearHeaders() {
+    for (int i = 0; i < MAX_HEADERS; i++) {
+        headerKeys[i] = "";
+        headerValues[i] = "";
+    }
+    headerCount = 0;
+}
+
+// Function to get a header value by key
+String getHeaderValue(String key) {
+    for (int i = 0; i < headerCount; i++) {
+        if (headerKeys[i] == key) {
+            return headerValues[i];
+        }
+    }
+    return "";
+}
