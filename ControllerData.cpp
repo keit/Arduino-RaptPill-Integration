@@ -28,6 +28,7 @@ void updateHeaterThreshold(ControllerData &ctrlData, float heaterThreashold) {
   Serial.println("Before updateHeaterThreshold");
   print(ctrlData);
   ctrlData.heaterThreshold = heaterThreashold;
+  ctrlData.heaterStatus = ctrlData.currentTemp < ctrlData.heaterThreshold;
   Serial.println("After updateHeaterThreshold");
   print(ctrlData);
 }

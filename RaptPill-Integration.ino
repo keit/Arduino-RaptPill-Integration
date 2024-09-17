@@ -224,6 +224,7 @@ void loop() {
   WiFiClient client = server.available();
   if (client) {
     handleClient(client);
+    switchPower(ctrlData.heaterStatus);
   } 
 
   unsigned long currentMillis = millis();

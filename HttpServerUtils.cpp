@@ -96,10 +96,10 @@ const char* getHTMLPage(String ipAddress) {
             fetch('http://<arduino_ip>/data')
                 .then(response => response.json())
                 .then(data => {
-                    document.getElementById('currentTemp').textContent = data.currentTemp + '°C';
+                    document.getElementById('currentTemp').textContent = data.currentTemp.toFixed(2) + '°C';
                     document.getElementById('currentGravity').textContent = data.currentGravity.toFixed(3);
                     document.getElementById('heaterStatus').textContent = data.heaterStatus;
-                    document.getElementById('heaterThreshold').textContent = data.heaterThreshold + '°C';
+                    document.getElementById('heaterThreshold').textContent = data.heaterThreshold.toFixed(2) + '°C';
                 })
                 .catch(error => {
                     console.error('Error fetching data:', error);
