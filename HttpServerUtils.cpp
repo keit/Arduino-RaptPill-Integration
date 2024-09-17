@@ -128,6 +128,7 @@ const char* getHTMLPage(String ipAddress) {
             .then(data => {
                 document.getElementById('message').textContent = data;
                 // Update the displayed table after submission
+                document.getElementById('newThreshold').value = '';
                 fetchData();
             })
             .catch(error => {
