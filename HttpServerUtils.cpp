@@ -82,6 +82,14 @@ const char* getHTMLPage(String ipAddress) {
                             Loading...
                         </td>
                     </tr>
+                    <tr class="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
+                        <th scope="row" class="px-2 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                            Memory
+                        </th>
+                        <td id="memory" class="px-2 py-4">
+                            Loading...
+                        </td>
+                    </tr>
                 </tbody>
             </table>
 
@@ -109,6 +117,7 @@ const char* getHTMLPage(String ipAddress) {
                     document.getElementById('heaterStatus').textContent = data.heaterStatus ? '☀️ On' : '❄️ Off';
                     document.getElementById('heaterThreshold').textContent = data.heaterThreshold.toFixed(2) + '°C';
                     document.getElementById('battery').textContent = data.battery.toFixed(0) + '%';
+                    document.getElementById('memory').textContent = data.memory;
                 })
                 .catch(error => {
                     console.error('Error fetching data:', error);
@@ -162,6 +171,7 @@ void sendJSONData(WiFiClient& client, ControllerData& ctrlData) {
     jsonDoc["heaterStatus"] = ctrlData.heaterStatus;
     jsonDoc["heaterThreshold"] = ctrlData.heaterThreshold;
     jsonDoc["battery"] = ctrlData.battery;
+    jsonDoc["memory"] = ctrlData.memory;
 
     String jsonResponse;
     serializeJson(jsonDoc, jsonResponse);

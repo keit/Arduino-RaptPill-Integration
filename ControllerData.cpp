@@ -1,12 +1,20 @@
 #include <Arduino.h>
 #include "ControllerData.h"
 
+extern "C" char *sbrk(int incr);
+
+int freeMemory() {
+  char stack_pointer;
+  return &stack_pointer - sbrk(0);
+}
+
 void print(ControllerData &ctrlData) {
   Serial.println("CurrentTemp: " + String(ctrlData.currentTemp) + 
   " Heater Threshold: " + String(ctrlData.heaterThreshold) + 
   " Current Gravity: " + String(ctrlData.currentGravity) + 
   " Heater Status: " + String(ctrlData.heaterStatus) +
-  " Battery: " + String(ctrlData.battery)
+  " Battery: " + String(ctrlData.battery) + 
+  " Memory: " + String(ctrlData.memory)
   );
 }
 
@@ -16,6 +24,7 @@ void initCtrlData(ControllerData &ctrlData) {
   ctrlData.heaterStatus = HEATER_OFF;
   ctrlData.heaterThreshold = TEMP_THRESHOLD_DEFAULT;
   ctrlData.battery = -1;
+  ctrlData.memory = -1;
 }
 
 void updateFromAPI(ControllerData &ctrlData, float temp, float gravity, float battery) {
@@ -37,5 +46,10 @@ void updateHeaterThreshold(ControllerData &ctrlData, float heaterThreashold) {
   ctrlData.heaterThreshold = heaterThreashold;
   ctrlData.heaterStatus = ctrlData.currentTemp < ctrlData.heaterThreshold;
   Serial.println("After updateHeaterThreshold");
+  print(ctrlData);
+}
+
+void updateMemorySize(ControllerData &ctrlData) {
+  ctrlData.memory = freeMemory();
   print(ctrlData);
 }

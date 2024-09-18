@@ -223,6 +223,7 @@ void loop() {
   if (client) {
     handleClient(client);
     switchPower(ctrlData.heaterStatus);
+    updateMemorySize(ctrlData);
   } 
 
   unsigned long currentMillis = millis();
@@ -231,10 +232,11 @@ void loop() {
     // Step 1: Obtain bearer token
     obtainBearerToken();
 
-    // Step 2: Make API request using the token
+    // // Step 2: Make API request using the token
     if (bearerToken != "") {
       refreshDataFromAPI();
       switchPower(ctrlData.heaterStatus);
-    }
+      updateMemorySize(ctrlData);
+    }  
   }
 }
