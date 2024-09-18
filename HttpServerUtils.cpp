@@ -187,7 +187,7 @@ void updateThreshold(WiFiClient& client, String request, ControllerData& ctrlDat
         client.println("Content-Type: text/plain");
         client.println("Connection: close");
         client.println();
-        client.println("Threshold updated to: " + String(ctrlData.heaterThreshold));
+        client.println("Threshold updated to: " + String(ctrlData.heaterThreshold) + "°C");
     }
 }
 
