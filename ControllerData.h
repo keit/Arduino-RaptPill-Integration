@@ -18,4 +18,5 @@ void initCtrlData(ControllerData &ctrlData);
 void updateFromAPI(ControllerData &ctrlData, float temp, float gravity, float battery);
 void updateHeaterThreshold(ControllerData &ctrlData, float heaterThreashold);
 void updateMemorySize(ControllerData &ctrlData);
+void printMemorySize(String message);
 #endif

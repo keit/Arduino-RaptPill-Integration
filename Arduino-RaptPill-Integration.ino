@@ -183,6 +183,7 @@ void heaterOff() {
 
 // Function to handle incoming HTTP requests
 void handleClient(WiFiClient client) {
+  printMemorySize("before ClearHeaders");
   clearHeaders();
 
   String requestLine = client.readStringUntil('\r');
@@ -191,22 +192,30 @@ void handleClient(WiFiClient client) {
 
   // Wait until the client sends some data
   while(client.available()) {
+    printMemorySize("before parseHTTPHeaders");
     parseHTTPHeaders(client);
     String hostName = getHeaderValue("Host");
 
     String requestBody = client.readString();
     Serial.println("Request Body: " + requestBody);
     client.flush();
-    
+
     if (requestLine.indexOf("GET /data") != -1) {
+      printMemorySize("before sendJSONData");
       // Serve the JSON data
       sendJSONData(client, ctrlData);
+      printMemorySize("after sendJSONData");
     } else if (requestLine.indexOf("POST /updateThreshold") != -1) {
+      printMemorySize("before updateThreshold");
       // Receive and update the heaterThreshold
       updateThreshold(client, requestBody, ctrlData);
+      printMemorySize("after updateThreshold");
     } else {
+      printMemorySize("before getHttpRespHeader");
       client.print(getHttpRespHeader());
-      client.print(getHTMLPage(hostName));
+
+      printMemorySize("before client.print");
+      client.print(htmlPage);
     }
     break;
   }
@@ -224,19 +233,19 @@ void loop() {
     handleClient(client);
     switchPower(ctrlData.heaterStatus);
     updateMemorySize(ctrlData);
-  } 
+  }
 
   unsigned long currentMillis = millis();
   if (currentMillis - previousMillis >= polling_interval || previousMillis == 0) {
     previousMillis = currentMillis;
     // Step 1: Obtain bearer token
-    obtainBearerToken();
+    // obtainBearerToken();
 
     // // Step 2: Make API request using the token
-    if (bearerToken != "") {
-      refreshDataFromAPI();
-      switchPower(ctrlData.heaterStatus);
-      updateMemorySize(ctrlData);
-    }  
+    // if (bearerToken != "") {
+    //   refreshDataFromAPI();
+    //   switchPower(ctrlData.heaterStatus);
+    //   updateMemorySize(ctrlData);
+    // }
   }
 }

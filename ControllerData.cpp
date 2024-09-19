@@ -53,3 +53,8 @@ void updateMemorySize(ControllerData &ctrlData) {
   ctrlData.memory = freeMemory();
   print(ctrlData);
 }
+
+void printMemorySize(String message) {
+  int memorySize = freeMemory();
+  Serial.println(message + " " + String(memorySize));
+}

@@ -1,8 +1,11 @@
+#include <Arduino.h>
+#include <string.h>
+#include <stdlib.h>
 #include "WiFiS3.h"
 #include "WiFiSSLClient.h"
 #include <ArduinoJson.h>
 #include "HttpServerUtils.h"
-
+#include "arduino_secrets.h"
 
 const int MAX_HEADERS = 10;  // Maximum number of headers to store
 String headerKeys[MAX_HEADERS];  // Array for header keys
@@ -16,8 +19,7 @@ const char* getHttpRespHeader() {
          "\r\n";  // This marks the end of headers
 }
 
-const char* getHTMLPage(String ipAddress) {
-  const char* page = R"(
+const char* htmlPage = R"(
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -105,11 +107,12 @@ const char* getHTMLPage(String ipAddress) {
             <p id="message" class="text-center text-green-500 mt-4"></p>
         </div>
     </div>
-
+)"
+R"(
     <script>
         // Fetch data from the Arduino server
         function fetchData() {
-            fetch('http://<arduino_ip>/data')
+            fetch('http://)" ARDUINO_HOST R"(/data')
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('currentTemp').textContent = data.currentTemp.toFixed(2) + '°C';
@@ -135,7 +138,7 @@ const char* getHTMLPage(String ipAddress) {
             const newThreshold = document.getElementById('newThreshold').value;
 
             // Send the updated threshold to the Arduino server
-            fetch('http://<arduino_ip>/updateThreshold', {
+            fetch('http://)" ARDUINO_HOST R"(/updateThreshold', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
@@ -158,11 +161,6 @@ const char* getHTMLPage(String ipAddress) {
 </body>
 </html>
 )";
-
-  String pageString = String(page);
-  pageString.replace(String("<arduino_ip>"), ipAddress);
-  return pageString.c_str();
-}
 
 void sendJSONData(WiFiClient& client, ControllerData& ctrlData) {
     StaticJsonDocument<200> jsonDoc;
