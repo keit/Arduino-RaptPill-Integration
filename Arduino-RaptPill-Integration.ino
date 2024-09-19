@@ -19,10 +19,10 @@ const char* password = SECRET_PASS;
 WiFiServer server(80);  // HTTP server on port 80
 
 // API credentials
-const char* client_id = "rapt-user";
-const char* grant_type = "password";
-const char* api_username = API_USER_NAME; // replace with actual username
-const char* api_password = API_SECRET; // replace with actual password
+// const char* client_id = "rapt-user";
+// const char* grant_type = "password";
+// const char* api_username = API_USER_NAME; // replace with actual username
+// const char* api_password = API_SECRET; // replace with actual password
 
 // API URLs
 const char* token_url = "https://id.rapt.io/connect/token";
@@ -90,10 +90,7 @@ void obtainBearerToken() {
   }
 
   // Build the request body
-  String requestBody = "client_id=" + String(client_id) +
-                       "&grant_type=" + String(grant_type) +
-                       "&username=" + String(api_username) +
-                       "&password=" + String(api_password);
+  String requestBody = "client_id=rapt-user&grant_type=password&username=" API_USER_NAME "&password=" API_SECRET;
 
   // Send the POST request
   id_client.println("POST /connect/token HTTP/1.1");
@@ -239,7 +236,7 @@ void loop() {
   if (currentMillis - previousMillis >= polling_interval || previousMillis == 0) {
     previousMillis = currentMillis;
     // Step 1: Obtain bearer token
-    // obtainBearerToken();
+    obtainBearerToken();
 
     // // Step 2: Make API request using the token
     // if (bearerToken != "") {
