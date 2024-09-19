@@ -18,12 +18,6 @@ const char* password = SECRET_PASS;
 // Server settings
 WiFiServer server(80);  // HTTP server on port 80
 
-// API credentials
-// const char* client_id = "rapt-user";
-// const char* grant_type = "password";
-// const char* api_username = API_USER_NAME; // replace with actual username
-// const char* api_password = API_SECRET; // replace with actual password
-
 // API URLs
 const char* token_url = "https://id.rapt.io/connect/token";
 const char* api_url = "https://api.rapt.io/api/Hydrometers/GetHydrometers";
@@ -112,9 +106,8 @@ void obtainBearerToken() {
   String jsonBody = id_client.readStringUntil('}');
 
   String tokenJSON = "{" + jsonBody + "}";
-
   // Parse the JSON response
-   DynamicJsonDocument doc(1024);
+   DynamicJsonDocument doc(2048);
    deserializeJson(doc, tokenJSON);
    bearerToken = doc["access_token"].as<String>();
 
@@ -184,7 +177,6 @@ void handleClient(WiFiClient client) {
   clearHeaders();
 
   String requestLine = client.readStringUntil('\r');
-  Serial.println("Request Line: " + requestLine);
   client.readStringUntil('\n');  // Skip remaining part of the request line
 
   // Wait until the client sends some data
@@ -194,7 +186,6 @@ void handleClient(WiFiClient client) {
     String hostName = getHeaderValue("Host");
 
     String requestBody = client.readString();
-    Serial.println("Request Body: " + requestBody);
     client.flush();
 
     if (requestLine.indexOf("GET /data") != -1) {
@@ -239,10 +230,10 @@ void loop() {
     obtainBearerToken();
 
     // // Step 2: Make API request using the token
-    // if (bearerToken != "") {
-    //   refreshDataFromAPI();
-    //   switchPower(ctrlData.heaterStatus);
-    //   updateMemorySize(ctrlData);
-    // }
+    if (bearerToken != "") {
+       refreshDataFromAPI();
+       switchPower(ctrlData.heaterStatus);
+       updateMemorySize(ctrlData);
+    }
   }
 }
