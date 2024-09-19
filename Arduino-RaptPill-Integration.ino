@@ -173,36 +173,23 @@ void heaterOff() {
 
 // Function to handle incoming HTTP requests
 void handleClient(WiFiClient client) {
-  printMemorySize("before ClearHeaders");
-  clearHeaders();
-
   String requestLine = client.readStringUntil('\r');
   client.readStringUntil('\n');  // Skip remaining part of the request line
 
   // Wait until the client sends some data
   while(client.available()) {
-    printMemorySize("before parseHTTPHeaders");
-    parseHTTPHeaders(client);
-    String hostName = getHeaderValue("Host");
-
     String requestBody = client.readString();
     client.flush();
 
     if (requestLine.indexOf("GET /data") != -1) {
-      printMemorySize("before sendJSONData");
       // Serve the JSON data
       sendJSONData(client, ctrlData);
-      printMemorySize("after sendJSONData");
-    } else if (requestLine.indexOf("POST /updateThreshold") != -1) {
-      printMemorySize("before updateThreshold");
+     } else if (requestLine.indexOf("POST /updateThreshold") != -1) {
       // Receive and update the heaterThreshold
       updateThreshold(client, requestBody, ctrlData);
-      printMemorySize("after updateThreshold");
-    } else {
-      printMemorySize("before getHttpRespHeader");
+     } else {
       client.print(getHttpRespHeader());
 
-      printMemorySize("before client.print");
       client.print(htmlPage);
     }
     break;
