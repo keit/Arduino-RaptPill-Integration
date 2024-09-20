@@ -103,12 +103,11 @@ const char* htmlPage = R"(
             <p id="message" class="text-center text-green-500 mt-4"></p>
         </div>
     </div>
-)"
-R"(
     <script>
+        const scriptOrigin = document.location.origin;
         // Fetch data from the Arduino server
         function fetchData() {
-            fetch('http://)" ARDUINO_HOST R"(/data')
+            fetch(scriptOrigin + '/data')
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('currentTemp').textContent = data.currentTemp.toFixed(2) + '°C';
@@ -134,7 +133,7 @@ R"(
             const newThreshold = document.getElementById('newThreshold').value;
 
             // Send the updated threshold to the Arduino server
-            fetch('http://)" ARDUINO_HOST R"(/updateThreshold', {
+            fetch(scriptOrigin + '/updateThreshold', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
@@ -194,5 +193,3 @@ void updateThreshold(WiFiClient& client, String request, ControllerData& ctrlDat
         client.println("Threshold updated to: " + String(ctrlData.heaterThreshold) + "°C");
     }
 }
-
-
