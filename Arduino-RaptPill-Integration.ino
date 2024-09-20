@@ -107,7 +107,7 @@ void obtainBearerToken() {
 
   String tokenJSON = "{" + jsonBody + "}";
   // Parse the JSON response
-   DynamicJsonDocument doc(2048);
+   DynamicJsonDocument doc(tokenJSON.length());
    deserializeJson(doc, tokenJSON);
    bearerToken = doc["access_token"].as<String>();
 
@@ -141,7 +141,7 @@ void refreshDataFromAPI() {
 
   String apiJSON = "[" + jsonBody + "]";
   // Parse the JSON response
-  DynamicJsonDocument doc(1024);
+  DynamicJsonDocument doc(apiJSON.length());
   deserializeJson(doc, apiJSON);
   updateFromAPI(ctrlData, doc[0]["temperature"].as<float>(), doc[0]["gravity"].as<float>(), doc[0]["battery"].as<float>());
 
