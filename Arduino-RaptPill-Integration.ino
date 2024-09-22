@@ -44,7 +44,11 @@ void setup() {
   pinMode(POWER, OUTPUT);
 
   initCtrlData(ctrlData);
-  Serial.println("Polling interval: " + String(polling_interval) + "ms. Heater threshold temp: " + String(ctrlData.heaterThreshold));
+
+  char message[100]; // Create a buffer to hold the resulting string
+  sprintf(message, "Polling interval: %d mins.  Heater threshold temp:  %f", polling_interval/1000, ctrlData.heaterThreshold);
+
+  Serial.println(message);
 
   connectToWiFi();
 
