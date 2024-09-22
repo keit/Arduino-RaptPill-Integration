@@ -176,20 +176,52 @@ void sendJSONData(WiFiClient& client, ControllerData& ctrlData) {
     client.println(jsonResponse);
 }
 
-void updateThreshold(WiFiClient& client, String request, ControllerData& ctrlData) {
-    // Parse the incoming request for heaterThreshold
+void updateThreshold(WiFiClient& client, ControllerData& ctrlData) {
+  if (seek(client, "heaterThreshold=")) {
+    char thresholdBuffer[10];
+    size_t lengthToRead1 = sizeof(thresholdBuffer) - 1;
+    client.readBytes(thresholdBuffer, lengthToRead1);
+    
+    updateHeaterThreshold(ctrlData, atof(thresholdBuffer));
 
-    if (request.indexOf("heaterThreshold=") != -1) {
-        int pos = request.indexOf("heaterThreshold=") + strlen("heaterThreshold=");
-        String thresholdValue = request.substring(pos);
-
-        updateHeaterThreshold(ctrlData, thresholdValue.toFloat());
-
-        // Respond with success message
-        client.println("HTTP/1.1 200 OK");
-        client.println("Content-Type: text/plain");
-        client.println("Connection: close");
-        client.println();
-        client.println("Threshold updated to: " + String(ctrlData.heaterThreshold) + "°C");
-    }
+    // Respond with success message
+    client.println("HTTP/1.1 200 OK");
+    client.println("Content-Type: text/plain");
+    client.println("Connection: close");
+    client.println();
+    client.println("Threshold updated to: " + String(ctrlData.heaterThreshold) + "°C");
+  }
 }
+
+bool seek(WiFiClient& client, char* target) {
+    const size_t bufferSize = 128;  // Fixed buffer size
+    char buffer[bufferSize + 1];    // Add 1 for null-termination
+    size_t index = 0;
+
+    // Initialize buffer to all zeros
+    memset(buffer, 0, bufferSize + 1);
+    
+    bool result = false;
+
+    while (client.connected() && client.available()) {
+        char c = client.read();  // Read one character at a time
+
+        // Shift buffer and append new character
+        if (index < bufferSize) {
+            buffer[index++] = c;
+        } else {
+            // If buffer is full, shift all characters left and append the new one
+            memmove(buffer, buffer + 1, bufferSize - 1);  // Shift left by one
+            buffer[bufferSize - 1] = c;                   // Add new character to the end
+        }
+
+        // Check if buffer contains the target substring
+        if (strstr(buffer, target) != NULL) {
+            Serial.println("Found target in data!");
+            result = true;
+            break;
+        }
+    }
+    return result;
+}
+

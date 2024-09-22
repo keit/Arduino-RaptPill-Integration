@@ -111,11 +111,11 @@ void obtainBearerToken() {
 
   String tokenJSON = "{" + jsonBody + "}";
   // Parse the JSON response
-   DynamicJsonDocument doc(tokenJSON.length());
-   deserializeJson(doc, tokenJSON);
-   bearerToken = doc["access_token"].as<String>();
+  DynamicJsonDocument doc(tokenJSON.length());
+  deserializeJson(doc, tokenJSON);
+  bearerToken = doc["access_token"].as<String>();
 
-   id_client.stop();
+  id_client.stop();
 }
 
 void refreshDataFromAPI() {
@@ -144,6 +144,7 @@ void refreshDataFromAPI() {
   String jsonBody = api_client.readStringUntil(']');
 
   String apiJSON = "[" + jsonBody + "]";
+
   // Parse the JSON response
   DynamicJsonDocument doc(apiJSON.length());
   deserializeJson(doc, apiJSON);
@@ -176,26 +177,31 @@ void heaterOff() {
 }
 
 // Function to handle incoming HTTP requests
-void handleClient(WiFiClient client) {
-  String requestLine = client.readStringUntil('\r');
-  client.readStringUntil('\n');  // Skip remaining part of the request line
+void handleClient(WiFiClient& client) {
+  char requestLine[40];
+  size_t lengthToRead1 = sizeof(requestLine) - 1;
+  client.readBytesUntil('\r', requestLine, lengthToRead1);
+
+  char skipRest[10];
+  size_t lengthToRead2 = sizeof(skipRest) - 1;
+  client.readBytesUntil('\r', skipRest, lengthToRead2);
+
 
   // Wait until the client sends some data
   while(client.available()) {
-    String requestBody = client.readString();
-    client.flush();
-
-    if (requestLine.indexOf("GET /data") != -1) {
+    if (strstr(requestLine, "GET /data") != NULL) {
       // Serve the JSON data
       sendJSONData(client, ctrlData);
-     } else if (requestLine.indexOf("POST /updateThreshold") != -1) {
+     } else if (strstr(requestLine, "POST /updateThreshold") != NULL) {
       // Receive and update the heaterThreshold
-      updateThreshold(client, requestBody, ctrlData);
+      updateThreshold(client, ctrlData);
      } else {
       client.print(getHttpRespHeader());
 
       client.print(htmlPage);
     }
+    client.flush();
+
     break;
   }
 
