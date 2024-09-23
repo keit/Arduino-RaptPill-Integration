@@ -195,6 +195,8 @@ void handleClient(WiFiClient& client) {
      } else if (strstr(requestLine, "POST /updateThreshold") != NULL) {
       // Receive and update the heaterThreshold
       updateThreshold(client, ctrlData);
+     } else if (strstr(requestLine, "POST /refreshNow") != NULL) {
+      setRefreshNow(ctrlData, true); 
      } else {
       client.print(getHttpRespHeader());
 
@@ -221,8 +223,10 @@ void loop() {
   }
 
   unsigned long currentMillis = millis();
-  if (currentMillis - previousMillis >= polling_interval || previousMillis == 0) {
+  if (currentMillis - previousMillis >= polling_interval || previousMillis == 0 || ctrlData.refreshNow) {
     previousMillis = currentMillis;
+    setRefreshNow(ctrlData, false);
+
     // Step 1: Obtain bearer token
     obtainBearerToken();
 

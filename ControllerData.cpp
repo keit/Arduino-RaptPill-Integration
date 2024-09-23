@@ -14,7 +14,8 @@ void print(ControllerData &ctrlData) {
   " Current Gravity: " + String(ctrlData.currentGravity) + 
   " Heater Status: " + String(ctrlData.heaterStatus) +
   " Battery: " + String(ctrlData.battery) + 
-  " Memory: " + String(ctrlData.memory)
+  " Memory: " + String(ctrlData.memory) +
+  " RefreshNow: " + String(ctrlData.refreshNow)
   );
 }
 
@@ -52,6 +53,10 @@ void updateHeaterThreshold(ControllerData &ctrlData, float heaterThreashold) {
 void updateMemorySize(ControllerData &ctrlData) {
   ctrlData.memory = freeMemory();
   print(ctrlData);
+}
+
+void setRefreshNow(ControllerData &ctrlData, bool flag) {
+  ctrlData.refreshNow = flag;
 }
 
 // void printMemorySize(String message) {
