@@ -223,7 +223,8 @@ void loop() {
   }
 
   unsigned long currentMillis = millis();
-  if (currentMillis - previousMillis >= polling_interval || previousMillis == 0 || ctrlData.refreshNow) {
+  if (currentMillis - previousMillis >= polling_interval || ctrlData.refreshNow) {
+    Serial.println("Going to server");
     previousMillis = currentMillis;
     setRefreshNow(ctrlData, false);
 

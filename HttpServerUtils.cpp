@@ -101,6 +101,9 @@ const char* htmlPage = R"(
                 </div>
             </form>
             <p id="message" class="text-center text-green-500 mt-4"></p>
+            <div class="flex flex-col items-center mt-2 space-y-2 sm:flex-row sm:space-y-0 sm:space-x-4">
+              <a id="refreshButton" href="#" class="text-blue-500 hover:text-blue-700 underline font-medium">Refresh From Server</a>
+            </div>
         </div>
     </div>
     <script>
@@ -149,6 +152,21 @@ const char* htmlPage = R"(
             })
             .catch(error => {
                 console.error('Error updating threshold:', error);
+            });
+        });
+        // Handle Refresh Now button click
+        document.getElementById('refreshButton').addEventListener('click', function() {
+            // Send POST request to /refreshNow endpoint
+            fetch(scriptOrigin + '/refreshNow', {
+                method: 'POST'
+            })
+            .then(response => response.text())
+            .then(data => {
+                console.log('Refresh Now successful:', data);
+                fetchData();  // Re-fetch data after refresh
+            })
+            .catch(error => {
+                console.error('Error refreshing data:', error);
             });
         });
     </script>
@@ -217,11 +235,9 @@ bool seek(WiFiClient& client, char* target) {
 
         // Check if buffer contains the target substring
         if (strstr(buffer, target) != NULL) {
-            Serial.println("Found target in data!");
             result = true;
             break;
         }
     }
     return result;
 }
-
