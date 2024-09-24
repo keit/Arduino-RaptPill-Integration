@@ -9,14 +9,17 @@ int freeMemory() {
 }
 
 void print(ControllerData &ctrlData) {
-  Serial.println("CurrentTemp: " + String(ctrlData.currentTemp) + 
-  " Heater Threshold: " + String(ctrlData.heaterThreshold) + 
-  " Current Gravity: " + String(ctrlData.currentGravity) + 
-  " Heater Status: " + String(ctrlData.heaterStatus) +
-  " Battery: " + String(ctrlData.battery) + 
-  " Memory: " + String(ctrlData.memory) +
-  " RefreshNow: " + String(ctrlData.refreshNow)
-  );
+  char buffer[128];
+  snprintf(buffer, sizeof(buffer),
+    "CurrentTemp: %.2f Heater Threshold: %.2f Current Gravity: %.2f Heater Status: %i Battery: %.2f  Memory: %i RefreshNow: %i",
+    ctrlData.currentTemp,
+    ctrlData.heaterThreshold,
+    ctrlData.currentGravity,
+    ctrlData.heaterStatus,
+    ctrlData.battery,
+    ctrlData.memory,
+    ctrlData.refreshNow);
+  Serial.println(buffer);
 }
 
 void initCtrlData(ControllerData &ctrlData) {
