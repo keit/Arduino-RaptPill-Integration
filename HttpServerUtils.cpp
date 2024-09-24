@@ -199,15 +199,17 @@ void updateThreshold(WiFiClient& client, ControllerData& ctrlData) {
     char thresholdBuffer[10];
     size_t lengthToRead1 = sizeof(thresholdBuffer) - 1;
     client.readBytes(thresholdBuffer, lengthToRead1);
-    
+
     updateHeaterThreshold(ctrlData, atof(thresholdBuffer));
 
     // Respond with success message
+    char messageBuffer[35];
+    snprintf(messageBuffer, sizeof(messageBuffer), "Threshold updated to: %.1f°C", ctrlData.heaterThreshold);
     client.println("HTTP/1.1 200 OK");
     client.println("Content-Type: text/plain");
     client.println("Connection: close");
     client.println();
-    client.println("Threshold updated to: " + String(ctrlData.heaterThreshold) + "°C");
+    client.println(messageBuffer);
   }
 }
 
@@ -218,7 +220,7 @@ bool seek(WiFiClient& client, char* target) {
 
     // Initialize buffer to all zeros
     memset(buffer, 0, bufferSize + 1);
-    
+
     bool result = false;
 
     while (client.connected() && client.available()) {
