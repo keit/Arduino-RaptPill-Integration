@@ -163,7 +163,9 @@ const char* htmlPage = R"(
             .then(response => response.text())
             .then(data => {
                 console.log('Refresh Now successful:', data);
-                fetchData();  // Re-fetch data after refresh
+                setTimeout(() => {
+                  fetchData();  // Re-fetch data after refresh
+                }, 3000);       // Need to wait Rapt Portal.
             })
             .catch(error => {
                 console.error('Error refreshing data:', error);
@@ -192,6 +194,14 @@ void sendJSONData(WiFiClient& client, ControllerData& ctrlData) {
     client.println("Connection: close");
     client.println();
     client.println(jsonResponse);
+}
+
+void sendEmptyResponse(WiFiClient& client, ControllerData& ctrlData) {
+    client.println("HTTP/1.1 200 OK");
+    client.println("Content-Type: application/json");
+    client.println("Connection: close");
+    client.println();
+    client.println("{}");
 }
 
 void updateThreshold(WiFiClient& client, ControllerData& ctrlData) {

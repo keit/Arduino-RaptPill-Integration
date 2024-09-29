@@ -197,9 +197,9 @@ void handleClient(WiFiClient& client) {
       updateThreshold(client, ctrlData);
      } else if (strstr(requestLine, "POST /refreshNow") != NULL) {
       setRefreshNow(ctrlData, true); 
+      sendEmptyResponse(client, ctrlData);
      } else {
       client.print(getHttpRespHeader());
-
       client.print(htmlPage);
     }
     client.flush();
