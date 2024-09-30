@@ -5,3 +5,6 @@ Arduino-RaptPill-Integration uses
 The RAPT Pill sends gravity and temperature data from the fermenter to the [RAPT Cloud](https://app.rapt.io/dashboard) every 30 minutes. The Arduino Uno retrieves this data from the cloud and, if the wort temperature falls below the set threshold, it activates the heating pad.
 
 By default, the temperature threshold is set to 18°C and can be adjusted through a web interface accessible via the Arduino.
+
+### Web Interface
+![screen shot](./Screenshot.jpg)
